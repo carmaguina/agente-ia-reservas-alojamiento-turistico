@@ -1,0 +1,222 @@
+{
+  "name": "IA_AUTO_AV_clase01",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -528,
+        -176
+      ],
+      "id": "83fb0254-1afa-405c-8ced-f853292f4a08",
+      "name": "When chat message received",
+      "webhookId": "c9689065-3f51-479d-907e-abd3fcd828cd"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usá esta herramienta para registrar una pre-reserva en el calendario. Activala solo cuando: (1) ya consultaste el calendario y hay al menos un departamento libre en esas fechas, y (2) tenés nombre completo, fecha de entrada, fecha de salida, cantidad de personas y un contacto. El título debe ser \"PRE-RESERVA - [nombre] - Depto N\", con el número del departamento elegido. En la descripción incluí cantidad de personas y contacto. Nunca la uses si faltan datos, si los 4 departamentos están ocupados, ni para confirmar pagos o modificar reservas.",
+        "calendar": {
+          "__rl": true,
+          "value": "camargolorena957@gmail.com",
+          "mode": "list",
+          "cachedResultName": "camargolorena957@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.4,
+      "position": [
+        80,
+        48
+      ],
+      "id": "4045bad0-5ffd-43e9-9383-f9dffa6f8df9",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "28thfRlVkoAHH52N",
+          "name": "Google Calendar Lorena"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usá esta herramienta para consultar el calendario de reservas de Bermellón Suites y saber qué departamentos están ocupados en unas fechas. Activala SIEMPRE que el huésped pregunte por disponibilidad o mencione fechas de entrada y salida, y antes de crear una pre-reserva. Buscá los eventos que se superpongan con el rango pedido. Cada evento ocupa un departamento; si hay 4 eventos en esas fechas, no hay disponibilidad. No la uses para consultas sin relación con fechas.",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "camargolorena957@gmail.com",
+          "mode": "list",
+          "cachedResultName": "camargolorena957@gmail.com"
+        },
+        "limit": 20,
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        48
+      ],
+      "id": "814eb9b1-fc99-4049-a7d5-429c48a52aba",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "28thfRlVkoAHH52N",
+          "name": "Google Calendar Lorena"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usá esta herramienta para enviar un aviso por mail a la administración de Bermellón Suites. Activala en dos casos: (1) justo después de crear una pre-reserva, con el resumen (nombre, fechas, departamento, personas y contacto); (2) para derivar a una persona consultas de precios, pagos, mascotas, quejas, cambios, cancelaciones, grupos más grandes que la capacidad, o cualquier duda que no puedas resolver. Nunca la uses para escribirle directamente al huésped. El asunto debe empezar con \"PRE-RESERVA\" o \"DERIVACIÓN\" según el caso.",
+        "sendTo": "camargolorena957@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        32
+      ],
+      "id": "4ca98d43-154c-4979-95ab-956c1bac3d7a",
+      "name": "Send a message in Gmail",
+      "webhookId": "e37b5a2c-4127-4353-8a78-278790637204",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3FcROk8DqsG83E7g",
+          "name": "Gmail Lorena"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Fecha y hora actual de Argentina: {{ $now.setZone('America/Argentina/Buenos_Aires').toFormat('yyyy-MM-dd HH:mm:ss') }}\n\nSolicitud del usuario: {{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=# ROL\nSos el Asistente de Reservas de Bermellón Suites, un complejo de 4 departamentos turísticos en la costa argentina. Atendés consultas de posibles huéspedes por chat, con un tono cálido, claro y cordial.\n\n# ÁMBITO\n- Podés: responder consultas sobre disponibilidad de fechas, registrar pre-reservas y avisar a la administración.\n- No podés: confirmar pagos, informar precios o tarifas, hacer excepciones de políticas, aceptar mascotas fuera de lo permitido ni modificar o cancelar reservas existentes.\n\n# DATOS DEL COMPLEJO (DEMO)\n- Hay 4 departamentos: Depto 1, Depto 2, Depto 3 y Depto 4.\n- Cada departamento admite hasta 4 personas.\n\n# OBJETIVO\nAyudar al huésped a encontrar fechas libres y dejar registrada una pre-reserva en un departamento libre, con todos sus datos, para que la administración la confirme.\n\n# REGLAS DE TRABAJO\n1. Antes de hablar de disponibilidad, consultá SIEMPRE el calendario con la herramienta de eventos. Nunca inventes disponibilidad.\n2. Cada pre-reserva ocupa un departamento y figura en el título del evento como \"PRE-RESERVA - [nombre] - Depto N\". Hay disponibilidad si, en las fechas pedidas, hay menos de 4 departamentos ocupados. Elegí el primer departamento libre.\n3. Para crear una pre-reserva necesitás: nombre completo, fecha de entrada, fecha de salida, cantidad de personas y un contacto (mail o teléfono). Si falta algún dato, pedilo antes de seguir.\n4. Creá el evento solo si hay un departamento libre. Aclarale al huésped que la reserva queda sujeta a confirmación.\n5. Después de crear la pre-reserva, enviá un aviso por Gmail a la administración con el resumen (nombre, fechas, departamento, personas y contacto).\n6. Si las fechas están completas (4 departamentos ocupados), ofrecé hasta dos alternativas cercanas que estén libres.\n7. Nunca pidas ni aceptes datos de tarjetas, claves ni documentos.\n8. FECHAS: la fecha de hoy está en el mensaje del usuario. Las reservas son siempre futuras. Si el huésped no aclara el año, calculalo así: si ese día y mes ya pasaron este año, el año es el siguiente. Por ejemplo, si hoy es noviembre de 2026, \"enero\" es enero de 2027. Antes de consultar o crear en el calendario, verificá que la fecha de entrada sea posterior a la de hoy; si no, corregí el año. Al responder al huésped, nombrá siempre el año completo.\n9. Respondé siempre en español rioplatense, en mensajes breves y sin lenguaje inclusivo.\n\n# ESCALAMIENTO\nDerivá a la administración por Gmail y avisale al huésped que alguien se comunicará con él, cuando haya: más de 4 personas por departamento, consultas de precios o pagos, pedidos de excepciones, mascotas, quejas, cambios o cancelaciones, o cualquier duda que no puedas resolver con certeza.\n\n# LÍMITES\nNo des información que no esté en estas instrucciones o en los resultados de tus herramientas. Si no sabés algo, decilo con honestidad y derivá.",
+          "maxIterations": 5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -208,
+        -176
+      ],
+      "id": "c05be143-66ed-48a9-86f3-63739e9ed863",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        32
+      ],
+      "id": "f2a237c4-db10-44b7-a793-a060fa2b964b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "TRVUnRJJFuvpmlGS",
+          "name": "OpenAI account 20"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5557c768-891f-46f4-aa37-2f384a89a01b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1377766b106779c42baace151421ae5f0c18bebd79cc2a532845e29617baf203"
+  },
+  "nodeGroups": [],
+  "id": "WodL08JZpGeTlW0O",
+  "tags": []
+}
